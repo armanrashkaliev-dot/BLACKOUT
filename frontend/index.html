@@ -1,0 +1,182 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLACKOUT</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#090e18;color:#e8f1ff;font-family:Arial,sans-serif;padding:20px 16px 90px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px}
+.logo{font-size:23px;font-weight:900;letter-spacing:3px}
+.status{font-size:11px;color:#42c8ff}
+.card{background:#111b2b;border:1px solid #20334d;border-radius:16px;padding:18px;margin-bottom:15px}
+.muted{color:#8294ad;font-size:12px}
+.amount{font-size:32px;font-weight:800;margin:10px 0}
+button{border:0;border-radius:12px;background:#168bd0;color:white;padding:14px;font-weight:bold;font-size:14px;cursor:pointer}
+.tap{width:100%;height:145px;font-size:25px;letter-spacing:3px;background:linear-gradient(135deg,#126ba8,#123d69);border:1px solid #36baff}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{background:#111b2b;border:1px solid #20334d;border-radius:13px;padding:18px 12px;text-align:center;color:#dceaff;cursor:pointer}
+.tile b{display:block;margin-bottom:7px}
+.page{display:none}
+.page.active{display:block}
+nav{position:fixed;bottom:0;left:0;right:0;background:#0d1625;border-top:1px solid #20334d;display:flex;justify-content:space-around;padding:12px 4px}
+nav button{background:transparent;color:#91a6c0;padding:8px 5px;font-size:11px}
+nav button.active{color:#42c8ff}
+h2{font-size:18px;letter-spacing:1px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">BLACKOUT</div>
+  <div class="status">● ONLINE</div>
+</header>
+
+<section id="home" class="page active">
+  <div class="card">
+    <div class="muted">ВАШ БАЛАНС</div>
+    <div class="amount"><span id="balance">0</span> NK</div>
+    <div class="muted">Coinuses · внутренняя игровая валюта</div>
+  </div>
+
+  <div class="card">
+    <div class="muted">BLACKOUT TAPPER</div>
+    <div class="amount" id="taps">0</div>
+    <button class="tap" onclick="tap()">TAP TO EARN</button>
+    <p class="muted">Нажимай и получай Coinuses</p>
+  </div>
+
+  <h2>РАЗДЕЛЫ</h2>
+  <div class="grid">
+    <div class="tile" onclick="showPage('numbers')"><b>NUMBERS</b><span class="muted">Виртуальные номера</span></div>
+    <div class="tile" onclick="showPage('usernames')"><b>USERNAMES</b><span class="muted">Коллекция имён</span></div>
+    <div class="tile" onclick="showPage('cases')"><b>CASES</b><span class="muted">Открытие кейсов</span></div>
+    <div class="tile" onclick="showPage('inventory')"><b>INVENTORY</b><span class="muted">Мой инвентарь</span></div>
+  </div>
+</section>
+
+<section id="numbers" class="page">
+  <h2>NUMBERS</h2>
+  <div class="card">
+    <div class="muted">КОЛЛЕКЦИЯ</div>
+    <p>Здесь будут виртуальные коллекционные номера BLACKOUT.</p>
+  </div>
+</section>
+
+<section id="usernames" class="page">
+  <h2>USERNAMES</h2>
+  <div class="card">
+    <div class="muted">КОЛЛЕКЦИЯ</div>
+    <p>Здесь будут виртуальные коллекционные имена.</p>
+  </div>
+</section>
+
+<section id="cases" class="page">
+  <h2>CASES</h2>
+  <div class="card">
+    <div class="muted">КЕЙСЫ</div>
+    <p>Скоро здесь появятся кейсы BLACKOUT.</p>
+  </div>
+</section>
+
+<section id="inventory" class="page">
+  <h2>INVENTORY</h2>
+  <div class="card">
+    <p>Твой инвентарь пока пуст.</p>
+  </div>
+</section>
+
+<section id="profile" class="page">
+  <h2>PROFILE</h2>
+  <div class="card">
+    <div class="muted">ИГРОК</div>
+    <div class="amount" id="username">Guest</div>
+    <div class="muted">USER · BLACKOUT</div>
+  </div>
+</section>
+
+<section id="settings" class="page">
+  <h2>SETTINGS</h2>
+  <div class="card">
+    <p>Настройки аккаунта</p>
+    <p class="muted">BLACKOUT · Coinuses (NK)</p>
+  </div>
+</section>
+
+<nav>
+  <button class="active" onclick="showPage('home',this)">HOME</button>
+  <button onclick="showPage('numbers',this)">NUMBERS</button>
+  <button onclick="showPage('cases',this)">CASES</button>
+  <button onclick="showPage('inventory',this)">ITEMS</button>
+  <button onclick="showPage('profile',this)">PROFILE</button>
+</nav>
+
+<script>
+let balance = 0;
+let taps = 0;
+
+async function tap(){
+  const tg = window.Telegram?.WebApp;
+
+  if (!tg || !tg.initData) {
+    alert("Открой BLACKOUT через Telegram");
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/tap', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({initData: tg.initData})
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert("Ошибка начисления NK");
+      return;
+    }
+
+    balance = data.balance;
+    taps++;
+    document.getElementById('taps').textContent = taps;
+    document.getElementById('balance').textContent = balance;
+
+  } catch (error) {
+    alert("Нет соединения с сервером");
+  }
+   }
+
+function showPage(id,button){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  if(button) button.classList.add('active');
+}
+
+const tg = window.Telegram?.WebApp;
+if(tg){
+  tg.ready();
+  tg.expand();
+  fetch('/api/auth',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({initData:tg.initData})
+  })
+  .then(r=>r.json())
+  .then(data=>{
+    if(data.username){
+      document.getElementById('username').textContent=data.username;
+      balance=data.balance||0;
+      document.getElementById('balance').textContent=balance;
+    }
+  })
+  .catch(()=>{});
+}
+</script>
+
+</body>
+</html>
