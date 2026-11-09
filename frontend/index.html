@@ -74,11 +74,23 @@ h2{font-size:18px;letter-spacing:1px}
   </div>
 </section>
 
-<section id="cases" class="page">
+  <section id="cases" class="page">
   <h2>CASES</h2>
+
   <div class="card">
-    <div class="muted">КЕЙСЫ</div>
-    <p>Скоро здесь появятся кейсы BLACKOUT.</p>
+    <div class="muted">BLACKOUT COLLECTION</div>
+    <h2>STARTER CASE</h2>
+    <p class="muted">Первый кейс коллекции BLACKOUT</p>
+    <div class="amount">100 NK</div>
+    <button style="width:100%" onclick="openCase('starter')">
+      OPEN CASE
+    </button>
+  </div>
+
+  <div id="caseResult" class="card" style="display:none">
+    <div class="muted">YOUR DROP</div>
+    <div class="amount" id="dropName">—</div>
+    <p id="dropRarity"></p>
   </div>
 </section>
 
@@ -150,7 +162,58 @@ async function tap(){
   }
    }
 
-function showPage(id,button){
+async function openCase(caseId){
+  const tg = window.Telegram?.WebApp;
+
+  if (!tg || !tg.initData) {
+    alert("Открой BLACKOUT через Telegram");
+    return;
+  }
+
+  const button = document.querySelector('#cases button');
+  button.disabled = true;
+  button.textContent = "OPENING...";
+
+  try {
+    const response = await fetch('/api/open-case', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        initData: tg.initData,
+        case_id: caseId
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.error || "Не удалось открыть кейс");
+      if (data.balance !== undefined) {
+        balance = data.balance;
+        document.getElementById('balance').textContent = balance;
+      }
+      return;
+    }
+
+    balance = data.balance;
+    document.getElementById('balance').textContent = balance;
+
+    document.getElementById('dropName').textContent = data.item.name;
+    document.getElementById('dropRarity').textContent = data.item.rarity;
+    document.getElementById('caseResult').style.display = 'block';
+
+    if (tg.HapticFeedback) {
+      tg.HapticFeedback.notificationOccurred('success');
+    }
+
+  } catch (error) {
+    alert("Ошибка соединения с сервером");
+  } finally {
+    button.disabled = false;
+    button.textContent = "OPEN CASE";
+  }
+}
+  function showPage(id,button){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
