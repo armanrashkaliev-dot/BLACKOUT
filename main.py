@@ -17,14 +17,15 @@ DB_NAME = "blackout.db"
 
 # НАГРАДЫ КЕЙСА
 CASE_ITEMS = [
-    {"name": "Shadow", "rarity": "COMMON", "weight": 350},
-    {"name": "Dark Matter", "rarity": "COMMON", "weight": 350},
-    {"name": "Night", "rarity": "RARE", "weight": 115},
-    {"name": "Phantom", "rarity": "RARE", "weight": 115},
-    {"name": "Blue Flame", "rarity": "EPIC", "weight": 30},
-    {"name": "Void", "rarity": "EPIC", "weight": 30},
-    {"name": "BLACKOUT", "rarity": "LEGENDARY", "weight": 10}
+    {"name": "+888 0000 888", "rarity": "COMMON", "weight": 350},
+    {"name": "+888 0111 111", "rarity": "COMMON", "weight": 350},
+    {"name": "+888 0777 777", "rarity": "RARE", "weight": 115},
+    {"name": "+888 0888 888", "rarity": "RARE", "weight": 115},
+    {"name": "+888 0999 999", "rarity": "EPIC", "weight": 30},
+    {"name": "+888 0666 666", "rarity": "EPIC", "weight": 30},
+    {"name": "+888 0000 001", "rarity": "LEGENDARY", "weight": 10}
 ]
+
 
 CASES = {
     "starter": {
